@@ -2,3 +2,8 @@ name: MMOStats
 version: '1.0-SNAPSHOT'
 main: com.klrir.mmoStats.MMOStats
 api-version: '1.21'
+softdepend: [ ProtocolLib ]
+commands:
+  e:
+  stats:
+  statsystem:

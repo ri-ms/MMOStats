@@ -7,9 +7,11 @@ import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class GetTotalStatEvent extends GamePlayerEvent implements Cancellable {
+public class GetTotalStatEvent extends PlayerEvent implements Cancellable {
+    private static final HandlerList handlers = new HandlerList();
     @Getter
     private final Stats stat;
     @Setter
@@ -23,7 +25,6 @@ public class GetTotalStatEvent extends GamePlayerEvent implements Cancellable {
         super(player);
         stat = stats;
         this.value = value;
-
     }
 
     public void addMultiplier(double d) {
@@ -45,6 +46,6 @@ public class GetTotalStatEvent extends GamePlayerEvent implements Cancellable {
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return handlers;
     }
 }
