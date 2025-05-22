@@ -1,7 +1,6 @@
 package com.klrir.mmoStats.game;
 
 import com.klrir.mmoStats.Stats;
-import com.klrir.mmoStats.utils.Tools;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

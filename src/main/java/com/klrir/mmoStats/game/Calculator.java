@@ -3,8 +3,6 @@ package com.klrir.mmoStats.game;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.klrir.mmoStats.API.Bundle;
 import com.klrir.mmoStats.API.CalculatorException;
 import com.klrir.mmoStats.API.GameDamageEvent;
@@ -17,19 +15,16 @@ import com.klrir.mmoStats.elements.Element;
 import com.klrir.mmoStats.elements.Elementable;
 import com.klrir.mmoStats.entities.BasicEntity;
 import com.klrir.mmoStats.entities.EntityHandler;
-import com.klrir.mmoStats.hook.ProtocolLibHook;
+import com.klrir.mmoStats.hook.Hook;
 import com.klrir.mmoStats.utils.Tools;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.level.ServerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataType;
@@ -38,7 +33,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Calculator {
@@ -334,54 +328,13 @@ public class Calculator {
     }
 
     public void showDamageTag(Entity e) {
-        
         Location loc = new Location(e.getWorld(), e.getLocation().getX(), e.getLocation().getY() + 0.7, e.getLocation().getZ());
         showDamageTag(loc, e);
-
-    }
-
-    public void showFireDamageTag(Entity e) {
-        
-        Location loc = new Location(e.getWorld(), e.getLocation().getX(), e.getLocation().getY() + 0.7, e.getLocation().getZ());
-        final String str = String.format("%.0f", (Tools.round(damage, 0)));
-        ArmorStand stand = loc.getWorld().spawn(loc, ArmorStand.class, armorstand -> {
-            armorstand.setVisible(false);
-            armorstand.setGravity(false);
-            armorstand.setMarker(true);
-            armorstand.setCustomNameVisible(true);
-            armorstand.setInvulnerable(true);
-            armorstand.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 999999));
-            armorstand.addScoreboardTag("damage_tag");
-            armorstand.setArms(false);
-            armorstand.setBasePlate(false);
-            armorstand.customName(Component.text(str).color(NamedTextColor.GOLD));
-        });
-        MMOStats.getInstance().killarmorstand(stand);
-    }
-
-    public void showThunderDamageTag(Entity e) {
-        
-        Location loc = new Location(e.getWorld(), e.getLocation().getX(), e.getLocation().getY() + 0.7, e.getLocation().getZ());
-        final String str = String.format("%.0f", (Tools.round(damage, 0)));
-        ArmorStand stand = loc.getWorld().spawn(loc, ArmorStand.class, armorstand -> {
-            armorstand.setVisible(false);
-            armorstand.setGravity(false);
-            armorstand.setMarker(true);
-            armorstand.setCustomNameVisible(true);
-            armorstand.setInvulnerable(true);
-            armorstand.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 999999));
-            armorstand.addScoreboardTag("damage_tag");
-            armorstand.setArms(false);
-            armorstand.setBasePlate(false);
-            armorstand.setCustomName("§9" + str);
-        });
-        MMOStats.getInstance().killarmorstand(stand);
     }
 
     public void showDamageTag(Location loc, Entity target) {
         if (isCanceled) return;
         if (result != null && result.isCancelled()) return;
-        int entityId = new Random().nextInt(100000) + 2000;
 
         loc = loc.clone().add(new Random().nextDouble(0.4) - 0.2, new Random().nextDouble(0.4) - 0.2, new Random().nextDouble(0.4) - 0.2);
         final String str = String.format("%.0f", (Tools.round(damage, 0)));
@@ -431,6 +384,57 @@ public class Calculator {
             armorstand.setBasePlate(false);
         });
 
+        if (Hook.isHooked(Hook.HookType.ProtocolLib)) {
+            ProtocolManager protocolManager = Hook.getProtocolManager();
+            // Se o alvo for um jogador, oculte o ArmorStand para ele usando ProtocolLib
+            if (target instanceof Player targetPlayer) {
+                // Crie um pacote para destruir a entidade apenas para o jogador alvo
+                PacketContainer destroyPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
+                destroyPacket.getIntegerArrays().write(0, new int[]{stand.getEntityId()});
+
+                // Envie o pacote apenas para o jogador alvo
+                protocolManager.sendServerPacket(targetPlayer, destroyPacket);
+            }
+        }
+
+        MMOStats.getInstance().killarmorstand(stand);
+    }
+
+    public void showFireDamageTag(Entity e) {
+        
+        Location loc = new Location(e.getWorld(), e.getLocation().getX(), e.getLocation().getY() + 0.7, e.getLocation().getZ());
+        final String str = String.format("%.0f", (Tools.round(damage, 0)));
+        ArmorStand stand = loc.getWorld().spawn(loc, ArmorStand.class, armorstand -> {
+            armorstand.setVisible(false);
+            armorstand.setGravity(false);
+            armorstand.setMarker(true);
+            armorstand.setCustomNameVisible(true);
+            armorstand.setInvulnerable(true);
+            armorstand.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 999999));
+            armorstand.addScoreboardTag("damage_tag");
+            armorstand.setArms(false);
+            armorstand.setBasePlate(false);
+            armorstand.customName(Component.text(str).color(NamedTextColor.GOLD));
+        });
+        MMOStats.getInstance().killarmorstand(stand);
+    }
+
+    public void showThunderDamageTag(Entity e) {
+        
+        Location loc = new Location(e.getWorld(), e.getLocation().getX(), e.getLocation().getY() + 0.7, e.getLocation().getZ());
+        final String str = String.format("%.0f", (Tools.round(damage, 0)));
+        ArmorStand stand = loc.getWorld().spawn(loc, ArmorStand.class, armorstand -> {
+            armorstand.setVisible(false);
+            armorstand.setGravity(false);
+            armorstand.setMarker(true);
+            armorstand.setCustomNameVisible(true);
+            armorstand.setInvulnerable(true);
+            armorstand.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 999999));
+            armorstand.addScoreboardTag("damage_tag");
+            armorstand.setArms(false);
+            armorstand.setBasePlate(false);
+            armorstand.setCustomName("§9" + str);
+        });
         MMOStats.getInstance().killarmorstand(stand);
     }
 

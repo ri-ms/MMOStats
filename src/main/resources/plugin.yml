@@ -7,3 +7,5 @@ commands:
   e:
   stats:
   statsystem:
+    description: "Ativar/Desativar o sistema de Status"
+    usage: "/statsystem"
