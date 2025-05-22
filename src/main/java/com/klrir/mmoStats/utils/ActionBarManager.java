@@ -26,6 +26,7 @@ public class ActionBarManager {
 
         String stackMsg = "";
         String afterManaString = "";
+        String extraafterdef = "";
 
         // Obter estatísticas do jogador
         health = MMOStats.getPlayerStat(player, Stats.Health);
@@ -33,27 +34,29 @@ public class ActionBarManager {
         double mana = MMOStats.getPlayerStat(player, Stats.Inteligence);
 
         // Criar string de defesa
-        String defenseString = Component.text(String.format("%.0f", Tools.round(defense, 0)) + Stats.Defense.symbol + " Defense", NamedTextColor.AQUA).toString();
+        String defenseString = String.format("%.0f", Tools.round(defense, 0)) + Stats.Defense.symbol + " Defense";
         if (player.showDefenceString) defenseString = player.defenseString;
 
         // Verificar absorção
         Player p = player.getPlayer();
         if (p != null && MMOStats.getAbsorbtion().containsKey(p) && MMOStats.getAbsorbtion().get(p) != 0) {
             // Vida: dourado
-            TextComponent actionBar = Component.text(player.currhealth + "/" + String.format("%.0f", Tools.round(health, 0)), NamedTextColor.GOLD)
+            TextComponent actionBar = Component.text(player.currhealth + MMOStats.absorbtion.get(player) + "/" + String.format("%.0f", Tools.round(health, 0)) + Stats.Health.getSymbol(), NamedTextColor.GOLD)
                     .append(Component.text(stackMsg + " ", NamedTextColor.WHITE))
                     .append(Component.text(defenseString + " ", NamedTextColor.GRAY))
-                    .append(Component.text(afterManaString + " ", NamedTextColor.GOLD))
-                    .append(Component.text("+" + MMOStats.getAbsorbtion().get(p), NamedTextColor.YELLOW));
+                    .append(Component.text(extraafterdef + "   ", NamedTextColor.GRAY))
+                    .append(Component.text(player.currmana + "/" + String.format("%.0f", Tools.round(mana, 0)) + "✎ Mana", NamedTextColor.BLUE))
+                    .append(Component.text(afterManaString + " ", NamedTextColor.BLUE));
 
             player.sendActionBar(actionBar);
         } else {
             // Vida: vermelho
-            TextComponent actionBar = Component.text(player.currhealth + "/" + String.format("%.0f", Tools.round(health, 0)), NamedTextColor.RED)
-                    .append(Component.text(stackMsg + " ", NamedTextColor.WHITE))
+            TextComponent actionBar = Component.text(player.currhealth + "/" + String.format("%.0f", Tools.round(health, 0)) + Stats.Health.getSymbol(), NamedTextColor.RED)
+                    .append(Component.text(stackMsg + "    ", NamedTextColor.WHITE))
                     .append(Component.text(defenseString + " ", NamedTextColor.GRAY))
-                    .append(Component.text(afterManaString + " ", NamedTextColor.GOLD))
-                    .append(Component.text(player.currmana + "/" + String.format("%.0f", Tools.round(mana, 0)) + "✎ Mana", NamedTextColor.BLUE));
+                    .append(Component.text(extraafterdef + "   ", NamedTextColor.GRAY))
+                    .append(Component.text(player.currmana + "/" + String.format("%.0f", Tools.round(mana, 0)) + "✎ Mana", NamedTextColor.BLUE))
+                    .append(Component.text(afterManaString + " ", NamedTextColor.BLUE));
 
             player.sendActionBar(actionBar);
         }

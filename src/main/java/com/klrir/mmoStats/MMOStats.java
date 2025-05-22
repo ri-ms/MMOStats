@@ -116,12 +116,6 @@ public final class MMOStats extends JavaPlugin {
     }
 
     private void registerCommands() {
-        getCommand("statsystem").setExecutor(new togglestats());
-        getCommand("statsystem").setTabCompleter(new toggletab());
-        getCommand("stats").setExecutor(new StatsCommand());
-        getCommand("stats").setTabCompleter(new statsTAB());
-        getCommand("e").setExecutor(new OpenMenu());
-
         registerCommand("statsystem", new togglestats(), new toggletab());
         registerCommand("stats", new StatsCommand(), new statsTAB());
         registerCommand("e", new OpenMenu(), null);

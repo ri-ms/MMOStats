@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MMOStats.main.iml" filepath="$PROJECT_DIR$/.idea/modules/MMOStats.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MMOStats.test.iml" filepath="$PROJECT_DIR$/.idea/modules/MMOStats.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.klrir.MMOStats.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.klrir.MMOStats.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.klrir.MMOStats.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.klrir.MMOStats.test.iml" />
     </modules>
   </component>
