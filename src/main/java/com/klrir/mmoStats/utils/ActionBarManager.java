@@ -33,14 +33,14 @@ public class ActionBarManager {
         double mana = MMOStats.getPlayerStat(player, Stats.Inteligence);
 
         // Criar string de defesa
-        String defenseString = Component.text(String.format("%.0f", Tools.round(defense, 0)) + "⛨ Defense", NamedTextColor.AQUA).toString();
+        String defenseString = Component.text(String.format("%.0f", Tools.round(defense, 0)) + Stats.Defense.symbol + " Defense", NamedTextColor.AQUA).toString();
         if (player.showDefenceString) defenseString = player.defenseString;
 
         // Verificar absorção
         Player p = player.getPlayer();
         if (p != null && MMOStats.getAbsorbtion().containsKey(p) && MMOStats.getAbsorbtion().get(p) != 0) {
-            // Vida: vermelho
-            TextComponent actionBar = Component.text(player.currhealth + "/" + String.format("%.0f", Tools.round(health, 0)), NamedTextColor.RED)
+            // Vida: dourado
+            TextComponent actionBar = Component.text(player.currhealth + "/" + String.format("%.0f", Tools.round(health, 0)), NamedTextColor.GOLD)
                     .append(Component.text(stackMsg + " ", NamedTextColor.WHITE))
                     .append(Component.text(defenseString + " ", NamedTextColor.GRAY))
                     .append(Component.text(afterManaString + " ", NamedTextColor.GOLD))

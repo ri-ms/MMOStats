@@ -39,6 +39,8 @@ public enum Stats {
     private final double maxAmount;
     private final boolean inRift;
 
+    private String extraDef = "⛨";
+
     Stats(String dataName, char symbol, @NotNull NamedTextColor color, String name, boolean isAggresive) {
         this(dataName, symbol, color, name, isAggresive, null, 0);
     }

@@ -25,11 +25,12 @@ import com.klrir.mmoStats.utils.Tools;
 import com.klrir.mmoStats.utils.inventories.items.StarHandler;
 import com.klrir.mmoStats.utils.log.DebugLogger;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -41,8 +42,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public final class MMOStats extends JavaPlugin {
     @Getter
@@ -73,9 +76,13 @@ public final class MMOStats extends JavaPlugin {
 
     public static DataManager data;
 
+    public static Logger LOGGER;
+
     @Override
     public void onEnable() {
         // Inicialização básica
+        LOGGER = getLogger();
+
         initializeConfig();
         instance = this;
 
@@ -114,6 +121,22 @@ public final class MMOStats extends JavaPlugin {
         getCommand("stats").setExecutor(new StatsCommand());
         getCommand("stats").setTabCompleter(new statsTAB());
         getCommand("e").setExecutor(new OpenMenu());
+
+        registerCommand("statsystem", new togglestats(), new toggletab());
+        registerCommand("stats", new StatsCommand(), new statsTAB());
+        registerCommand("e", new OpenMenu(), null);
+    }
+
+    public void registerCommand(String name, CommandExecutor executor, @Nullable TabCompleter tabCompleter) {
+        PluginCommand command = getCommand(name);
+        if (command != null) {
+            command.setExecutor(executor);
+            if (tabCompleter != null) {
+                command.setTabCompleter(tabCompleter);
+            }
+        } else {
+            LOGGER.warning("Command '" + name + "' not registered!");
+        }
     }
 
     /**
@@ -193,7 +216,7 @@ public final class MMOStats extends JavaPlugin {
             @Override
             public void run(){
                 Bukkit.getOnlinePlayers().forEach(p -> {
-                   GamePlayer player = GamePlayer.getGamePlayer(p);
+                    GamePlayer player = GamePlayer.getGamePlayer(p);
                     if (!deathPersons.contains(player)) {
                         player.setSaturation(100);
 
@@ -261,6 +284,7 @@ public final class MMOStats extends JavaPlugin {
 
     public static void updateAbsorption(GamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
+        assert player != null;
         if (absorbtion.containsKey(player) && absorbtion.get(player) != 0) {
             int abs = absorbtion.get(player);
 
@@ -296,7 +320,10 @@ public final class MMOStats extends JavaPlugin {
             GameEntity.updateEntity(EntityMap.getGmEntity(entity));
             return;
         }
-        new BasicEntity(entity, (int) (entity.getAttribute(Attribute.MAX_HEALTH).getBaseValue() * 5));
+        AttributeInstance maxHealth = entity.getAttribute(Attribute.MAX_HEALTH);
+        double baseHealth = (maxHealth != null) ? maxHealth.getBaseValue() : 20.0;
+
+        new BasicEntity(entity, (int) (baseHealth * 5));
     }
 
     public synchronized static double getPlayerStat(GamePlayer player, Stats stat) {
