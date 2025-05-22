@@ -192,7 +192,6 @@ public class Calculator {
             totaldmg += (int) (truedamage * effectivetruedmg);
         }
         this.damage = totaldmg;
-        System.out.println("here entityToPlayerDamage");
     }
 
     public void playerToPlayerDamage(GamePlayer target, GamePlayer player) {
@@ -249,28 +248,22 @@ public class Calculator {
     }
 
     public void damagePlayer(GamePlayer player, EntityDamageEvent.DamageCause cause) {
-        System.out.println("Trying to damage player <- damagePlayer");
         if (projectile == null) result = new GameDamageEvent(player, e, this, type, cause);
 
         else result = new GameDamageEvent(player, e, this, type, cause, projectile);
         Bukkit.getPluginManager().callEvent(result);
         if (result.isCancelled()) {
-            System.out.println("Trying to damage player - Event is Cancelled <- damagePlayer");
             return;}
         if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) damage = 0;
         if (damage > 0){
             player.damage(0.0001);
-            System.out.println("Damaged player <- damagePlayer");
         };
-        System.out.println("Damage: " + damage);
         if (MMOStats.absorbtion.get(player.getPlayer()) - damage < 0) {
             float restdamage = (float) damage - (float) MMOStats.absorbtion.get(player);
             MMOStats.absorbtion.replace(player, 0);
             player.setHealth(player.currhealth - (int) restdamage, HealthChangeReason.Damage);
-            System.out.println("Damaged player <- damagePlayer");
         } else {
             MMOStats.absorbtion.replace(player, MMOStats.absorbtion.get(player) - (int) damage);
-            System.out.println("Player Absorption damaged ?? <- damagePlayer");
         }
         MMOStats.updatebar(player);
     }
@@ -393,45 +386,6 @@ public class Calculator {
         loc = loc.clone().add(new Random().nextDouble(0.4) - 0.2, new Random().nextDouble(0.4) - 0.2, new Random().nextDouble(0.4) - 0.2);
         final String str = String.format("%.0f", (Tools.round(damage, 0)));
 
-        WrappedDataWatcher watcher = new WrappedDataWatcher();
-        WrappedDataWatcher.Serializer byteSerializer = WrappedDataWatcher.Registry.get(Byte.class);
-        watcher.setObject(0, byteSerializer, (byte) 0x20); // invisible
-        watcher.setObject(2, WrappedDataWatcher.Registry.getChatComponentSerializer(),
-                Optional.of(WrappedChatComponent.fromText(str).getHandle()));
-
-        watcher.setObject(3, WrappedDataWatcher.Registry.get(Boolean.class), true); // nome visível
-        watcher.setObject(5, WrappedDataWatcher.Registry.get(Boolean.class), true); // no gravity
-        watcher.setObject(14, WrappedDataWatcher.Registry.get(Boolean.class), true); // marker (sem hitbox)
-
-        PacketContainer spawn = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
-        spawn.getIntegers().write(0, entityId); // entity ID
-        spawn.getIntegers().write(1, 1); // EntityType ID 1 = ArmorStand
-        spawn.getDoubles().write(0, loc.getX());
-        spawn.getDoubles().write(1, loc.getY());
-        spawn.getDoubles().write(2, loc.getZ());
-        spawn.getUUIDs().write(0, UUID.randomUUID());
-
-        PacketContainer meta = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        meta.getIntegers().write(0, entityId);
-        meta.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
-
-        PacketContainer destroy = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
-        destroy.getIntLists().write(0, Collections.singletonList(entityId));
-
-        ProtocolManager manager = ProtocolLibHook.getProtocolManager();
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.equals(target)) continue;
-
-            ProtocolLibHook.protocolManager.sendServerPacket(p, spawn);
-            manager.sendServerPacket(p, meta);
-
-            // Despawning depois de 2 segundos
-            Bukkit.getScheduler().runTaskLater(MMOStats.getInstance(), () -> {
-                manager.sendServerPacket(p, destroy);
-            }, 20);
-        }
-
-
         ArmorStand stand = loc.getWorld().spawn(loc, ArmorStand.class, armorstand -> {
             armorstand.setVisible(false);
 
@@ -478,7 +432,6 @@ public class Calculator {
         });
 
         MMOStats.getInstance().killarmorstand(stand);
-
     }
 
     public void playerToEntityMagicDamage(GamePlayer player, @Nullable LivingEntity e, double magicDamage) {
@@ -487,8 +440,8 @@ public class Calculator {
         if (e != null && e.getScoreboardTags().contains("npc")) return;
 
         if (e != null && e.getScoreboardTags().contains("abilityimun")) return;
-        if (e != null && GameEntity.livingEntity.exists(e)) {
-            EntityAtributes atributes = GameEntity.livingEntity.getGmEntity(e).getClass().getAnnotation(EntityAtributes.class);
+        if (e != null && EntityMap.exists(e)) {
+            EntityAtributes atributes = EntityMap.getGmEntity(e).getClass().getAnnotation(EntityAtributes.class);
             if (atributes != null) for (EntityAtributes.Attributes attributes : atributes.value())
                 if (attributes == EntityAtributes.Attributes.AbilityImune) return;
         }

@@ -135,6 +135,7 @@ public abstract class GameEntity implements Elementable {
             @Override
             public void run() {
                 cooldowns.remove(entity);
+                System.out.println("Removed " + entity.getName() + " from cooldown");
             }
         }.runTaskLater(MMOStats.getInstance(), 15);
 

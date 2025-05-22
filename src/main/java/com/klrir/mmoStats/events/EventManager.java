@@ -113,6 +113,12 @@ public class EventManager implements Listener {
             return;
         }
 
+        if (GameEntity.isOnCooldown((LivingEntity) event.getDamager())) {
+            event.setCancelled(true);
+            return;
+        }
+        GameEntity.setOnCooldown((LivingEntity) event.getDamager());
+
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
             GamePlayer player = GamePlayer.getGamePlayer((Player) event.getDamager());
             GamePlayer target = GamePlayer.getGamePlayer((Player) event.getEntity());
@@ -123,6 +129,7 @@ public class EventManager implements Listener {
 
             c.playerToPlayerDamage(target, player);
             c.damagePlayer(target);
+            c.showDamageTag(target);
             return;
         }
 
@@ -130,12 +137,6 @@ public class EventManager implements Listener {
 
         if (event.getEntity() instanceof Player && damager instanceof LivingEntity) {
             GamePlayer player = GamePlayer.getGamePlayer((Player) event.getEntity());
-
-            if (GameEntity.isOnCooldown((LivingEntity) event.getDamager())) {
-                event.setCancelled(true);
-                return;
-            }
-            GameEntity.setOnCooldown((LivingEntity) event.getDamager());
 
             if (MMOStats.getInstance().getConfig().getBoolean("StatSystem")) {
                 if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {

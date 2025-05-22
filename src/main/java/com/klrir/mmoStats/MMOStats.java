@@ -25,6 +25,7 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -34,6 +35,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -189,8 +191,7 @@ public final class MMOStats extends JavaPlugin {
         if (player.currhealth <= 0) {
             deathPersons.add(player);
             assert player.getPlayer() != null;
-            player.getPlayer().setHealth(0);
-            player.kill();
+            player.getPlayer().damage(Float.MAX_VALUE);
         }
         double maxhealth = getPlayerStat(player, Stats.Health);
         if (maxhealth < 125) {
