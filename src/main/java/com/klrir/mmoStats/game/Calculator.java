@@ -6,6 +6,7 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.klrir.mmoStats.API.Bundle;
 import com.klrir.mmoStats.API.CalculatorException;
 import com.klrir.mmoStats.API.GameDamageEvent;
@@ -390,29 +391,38 @@ public class Calculator {
             try {
                 ProtocolManager protocolManager = Hook.getProtocolManager();
                 if (protocolManager != null) {
-                    // Registrar um interceptador de pacotes para este jogador específico
-                    protocolManager.addPacketListener(
-                            new PacketAdapter(MMOStats.getInstance(), ListenerPriority.NORMAL,
-                                    PacketType.Play.Server.ENTITY_METADATA) {
-                                @Override
-                                public void onPacketSending(PacketEvent event) {
-                                    // Verificar se o pacote é para o jogador alvo
-                                    if (event.getPlayer().equals(targetPlayer)) {
-                                        // Verificar se o pacote é para o ArmorStand específico
-                                        if (event.getPacket().getIntegers().read(0) == stand.getEntityId()) {
-                                            // Cancelar o envio deste pacote de metadata
-                                            event.setCancelled(true);
+                    // Executar na próxima tick para garantir que o ArmorStand esteja totalmente inicializado
+                    Bukkit.getScheduler().runTaskLater(MMOStats.getInstance(), () -> {
+                        try {
+                            // Obter o watcher atual da entidade
+                            Entity entity = stand;
+                            WrappedDataWatcher watcher = WrappedDataWatcher.getEntityWatcher(entity);
 
-                                            // Remover o listener após interceptar o pacote
-                                            protocolManager.removePacketListener(this);
-                                        }
-                                    }
-                                }
-                            }
-                    );
+                            // Criar uma cópia do watcher para modificar
+                            WrappedDataWatcher newWatcher = new WrappedDataWatcher(watcher.getHandle());
+
+                            // Definir a visibilidade do nome customizado como falsa
+                            WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
+                            newWatcher.setObject(3, booleanSerializer, false);
+
+                            // Criar o pacote de metadata
+                            PacketContainer metadataPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
+                            metadataPacket.getIntegers().write(0, stand.getEntityId());
+                            metadataPacket.getWatchableCollectionModifier().write(0, newWatcher.getWatchableObjects());
+
+                            // Enviar o pacote apenas para o jogador alvo
+                            protocolManager.sendServerPacket(targetPlayer, metadataPacket);
+
+                            Bukkit.getLogger().info("Pacote de metadata enviado com sucesso para " + targetPlayer.getName());
+                        } catch (Exception e) {
+                            Bukkit.getLogger().warning("Erro ao enviar pacote de metadata: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }, 1L); // Atraso de 1 tick
                 }
             } catch (Exception e) {
-                Bukkit.getLogger().warning("Erro ao configurar interceptador de pacotes: " + e.getMessage());
+                Bukkit.getLogger().warning("Erro ao configurar pacote de metadata: " + e.getMessage());
+                e.printStackTrace();
             }
         }
 

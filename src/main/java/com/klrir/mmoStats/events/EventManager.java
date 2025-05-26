@@ -6,6 +6,8 @@ import com.klrir.mmoStats.Stats;
 import com.klrir.mmoStats.entities.BasicEntity;
 import com.klrir.mmoStats.entities.StandCoreExtention;
 import com.klrir.mmoStats.game.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -18,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -251,6 +254,17 @@ public class EventManager implements Listener {
                 }
             }
             event.setDamage(0);
+        }
+    }
+
+    public void PlayerXpEvent(PlayerExpChangeEvent event) {
+        GamePlayer gamePlayer = GamePlayer.getGamePlayer(event.getPlayer());
+
+        int oldLevel = gamePlayer.getLevelFromXp();
+        int obtainedLevel = gamePlayer.addXpToPlayer(event.getAmount() * 2.3);
+        int levelDiff = obtainedLevel - oldLevel;
+        for (int level = 0; level <= levelDiff; level++) {
+            gamePlayer.sendActionBar(Component.text("Level-Up! " + oldLevel + " > " + obtainedLevel, NamedTextColor.DARK_GREEN));
         }
     }
 }

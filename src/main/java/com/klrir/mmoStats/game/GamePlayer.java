@@ -30,6 +30,7 @@ public class GamePlayer extends CraftPlayer {
     public int currhealth;
     public double currmana;
     public int absorbtion;
+
     @Setter
     public int speedCap = 500;
     private final ConfigFile inventory;
@@ -223,7 +224,6 @@ public class GamePlayer extends CraftPlayer {
 
     public void setHealth(int value, HealthChangeReason reason) {
         setHealth((double) value, reason);
-
     }
 
     public void setHealth(double value, HealthChangeReason reason) {
@@ -246,5 +246,36 @@ public class GamePlayer extends CraftPlayer {
     public void kill() {
         Slayer possibleSlayer = Slayer.getSlayer(this);
         if (possibleSlayer != null) GameEntity.killEntity(possibleSlayer, null);
+    }
+
+    @Getter
+    private double xp;
+    private static final int maxLevel = 100;
+    private static final double exponent = 1.25;
+    private static final double baseXp = 50;
+
+    // XP necessário total para alcançar um nível específico
+    public static int getTotalXpForLevel(int level) {
+        if (level <= 1) return 0;
+        return (int) Math.floor(baseXp * Math.pow(level - 1, exponent));
+    }
+
+    public int getLevelFromXp() {
+        for (int level = 1; level <= maxLevel; level++) {
+            if (xp < getTotalXpForLevel(level + 1)) {
+                return level;
+            }
+        }
+        return maxLevel;
+    }
+
+    // XP necessário para passar do nível atual ao próximo
+    public static int getXpToNextLevel(int level) {
+        return getTotalXpForLevel(level + 1) - getTotalXpForLevel(level);
+    }
+
+    public int addXpToPlayer(double quantity) {
+        this.xp += quantity;
+        return getLevelFromXp();
     }
 }
