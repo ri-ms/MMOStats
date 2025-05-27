@@ -349,5 +349,4 @@ public final class MMOStats extends JavaPlugin {
         kekw = Tools.round(kekw, 1);
         return kekw;
     }
-
 }

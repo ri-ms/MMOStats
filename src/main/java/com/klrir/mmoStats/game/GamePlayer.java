@@ -9,6 +9,7 @@ import com.klrir.mmoStats.configs.ConfigFile;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -60,19 +61,15 @@ public class GamePlayer extends CraftPlayer {
     }
     public GamePlayer(CraftServer server, ServerPlayer entity, boolean isChecked) {
         super(server, entity);
-        inventory = new ConfigFile(this, "inventory");
         this.player = entity.getBukkitEntity().getPlayer();
         players.put(player, this);
-        for (Stats stat : Stats.values()){
-            if (stat == Stats.WeaponDamage) continue;
-            double value = statsConfig.get().getDouble(stat.getDataName(), stat.getBaseAmount());
-            if (stat.getMaxAmount() > 0 && value > stat.getMaxAmount()) value = stat.getMaxAmount();
-            setBaseStat(stat, value);
-        }
+
+        inventory = new ConfigFile(this, "inventory");
+
+
+        loadStatus();
 
         loadInventory();
-        currmana = (int) MMOStats.getPlayerStat(this, Stats.Inteligence);
-        currhealth = (int) MMOStats.getPlayerStat(this, Stats.Health);
     }
 
     public void unregister() {
@@ -81,6 +78,18 @@ public class GamePlayer extends CraftPlayer {
             statsConfig.get().set(stats.getDataName(), getBaseStat(stats));
         }
         statsConfig.save(MMOStats.getInstance().isEnabled());
+    }
+
+    private void loadStatus() {
+        for (Stats stat : Stats.values()){
+            if (stat == Stats.WeaponDamage) continue;
+            double value = statsConfig.get().getDouble(stat.getDataName(), stat.getBaseAmount());
+            if (stat.getMaxAmount() > 0 && value > stat.getMaxAmount()) value = stat.getMaxAmount();
+            setBaseStat(stat, value);
+        }
+
+        currmana = (int) MMOStats.getPlayerStat(this, Stats.Inteligence);
+        currhealth = (int) MMOStats.getPlayerStat(this, Stats.Health);
     }
 
     private void loadInventory() {
@@ -132,7 +141,6 @@ public class GamePlayer extends CraftPlayer {
                 map.put(key.getKey(), data.get(key, PersistentDataType.FLOAT).toString());
             else if (data.has(key, PersistentDataType.INTEGER))
                 map.put(key.getKey(), data.get(key, PersistentDataType.INTEGER).toString());
-
         }
         return map;
     }
@@ -148,6 +156,7 @@ public class GamePlayer extends CraftPlayer {
     public void setBaseStat(Stats stat, double value) {
         baseStat.put(stat, value);
     }
+
     public ItemStack getItemInHand(){
         return this.player.getInventory().getItemInMainHand();
     }
@@ -253,6 +262,7 @@ public class GamePlayer extends CraftPlayer {
     private static final int maxLevel = 100;
     private static final double exponent = 1.25;
     private static final double baseXp = 50;
+    private static final int pointsPerLevel = 3;
 
     // XP necessário total para alcançar um nível específico
     public static int getTotalXpForLevel(int level) {

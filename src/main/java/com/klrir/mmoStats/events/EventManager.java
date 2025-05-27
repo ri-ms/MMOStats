@@ -1,6 +1,7 @@
 package com.klrir.mmoStats.events;
 
 import com.klrir.mmoStats.API.HealthChangeReason;
+import com.klrir.mmoStats.API.PlayerEvent.GetTotalStatEvent;
 import com.klrir.mmoStats.MMOStats;
 import com.klrir.mmoStats.Stats;
 import com.klrir.mmoStats.entities.BasicEntity;
@@ -257,6 +258,7 @@ public class EventManager implements Listener {
         }
     }
 
+    @EventHandler
     public void PlayerXpEvent(PlayerExpChangeEvent event) {
         GamePlayer gamePlayer = GamePlayer.getGamePlayer(event.getPlayer());
 
