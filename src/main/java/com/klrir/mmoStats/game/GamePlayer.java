@@ -9,7 +9,6 @@ import com.klrir.mmoStats.configs.ConfigFile;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stat;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -66,9 +65,7 @@ public class GamePlayer extends CraftPlayer {
 
         inventory = new ConfigFile(this, "inventory");
 
-
         loadStatus();
-
         loadInventory();
     }
 

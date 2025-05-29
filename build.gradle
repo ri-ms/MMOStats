@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.23'
     id 'xyz.jpenilla.run-paper' version '2.3.1'
     id 'io.papermc.paperweight.userdev' version '2.0.0-beta.16'
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = 'com.klrir'
@@ -34,6 +35,7 @@ dependencies {
     compileOnly 'dev.lone:api-itemsadder:4.0.10'
 
     implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
+    implementation('fr.skytasul:glowingentities:1.4.4')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
 }
@@ -42,6 +44,12 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
+}
+
+shadowJar {
+    archiveBaseName.set(rootProject.name) // nome base
+    archiveClassifier.set('') // sem "-all"
+    archiveVersion.set('1.0') // opcional
 }
 
 kotlin {

@@ -6,6 +6,7 @@ softdepend: [ ProtocolLib ]
 commands:
   e:
   stats:
+  glow:
   statsystem:
     description: "Ativar/Desativar o sistema de Status"
     usage: "/statsystem"

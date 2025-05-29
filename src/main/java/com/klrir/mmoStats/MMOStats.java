@@ -6,6 +6,7 @@ import com.klrir.mmoStats.API.PlayerEvent.PlayerManaRegenEvent;
 import com.klrir.mmoStats.commands.OpenMenu;
 import com.klrir.mmoStats.commands.StatsCommand;
 import com.klrir.mmoStats.commands.statsTAB;
+import com.klrir.mmoStats.commands.test.GlowCommand;
 import com.klrir.mmoStats.commands.test.togglestats;
 import com.klrir.mmoStats.commands.test.toggletab;
 import com.klrir.mmoStats.configs.DataManager;
@@ -24,6 +25,7 @@ import com.klrir.mmoStats.utils.PlayerStatsManager;
 import com.klrir.mmoStats.utils.Tools;
 import com.klrir.mmoStats.utils.inventories.items.StarHandler;
 import com.klrir.mmoStats.utils.log.DebugLogger;
+import fr.skytasul.glowingentities.GlowingEntities;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
@@ -78,6 +80,9 @@ public final class MMOStats extends JavaPlugin {
 
     public static Logger LOGGER;
 
+    @Getter
+    private static GlowingEntities glowingEntities;
+
     @Override
     public void onEnable() {
         // Inicialização básica
@@ -85,6 +90,7 @@ public final class MMOStats extends JavaPlugin {
 
         initializeConfig();
         instance = this;
+        glowingEntities = new GlowingEntities(this);
 
         // Registrar hooks
         Hook.register();
@@ -107,6 +113,7 @@ public final class MMOStats extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        glowingEntities.disable();
     }
 
     private void initializeConfig() {
@@ -119,6 +126,7 @@ public final class MMOStats extends JavaPlugin {
         registerCommand("statsystem", new togglestats(), new toggletab());
         registerCommand("stats", new StatsCommand(), new statsTAB());
         registerCommand("e", new OpenMenu(), null);
+        registerCommand("glow", new GlowCommand(), null);
     }
 
     public void registerCommand(String name, CommandExecutor executor, @Nullable TabCompleter tabCompleter) {

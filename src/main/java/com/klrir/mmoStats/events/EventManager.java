@@ -1,14 +1,17 @@
 package com.klrir.mmoStats.events;
 
 import com.klrir.mmoStats.API.HealthChangeReason;
-import com.klrir.mmoStats.API.PlayerEvent.GetTotalStatEvent;
 import com.klrir.mmoStats.MMOStats;
 import com.klrir.mmoStats.Stats;
 import com.klrir.mmoStats.entities.BasicEntity;
 import com.klrir.mmoStats.entities.StandCoreExtention;
 import com.klrir.mmoStats.game.*;
+import fr.skytasul.glowingentities.GlowingEntities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -29,11 +32,25 @@ import org.bukkit.util.Vector;
 
 public class EventManager implements Listener {
     public EventManager Events;
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event){
         MMOStats.absorbtion.put(event.getPlayer(), 0);
         MMOStats.absorbtionrunntime.put(event.getPlayer(), 0);
         GamePlayer player = new GamePlayer((CraftServer) MMOStats.getInstance().getServer(), ((CraftPlayer) event.getPlayer()).getHandle());
+        GlowingEntities glowingEntities = MMOStats.getGlowingEntities();
+
+        Bukkit.getScheduler().runTaskLaterAsynchronously(MMOStats.getInstance(), () -> {
+            for (Player gp : Bukkit.getOnlinePlayers()) {
+                try {
+                    glowingEntities.setGlowing(gp, player, ChatColor.DARK_PURPLE);
+                    glowingEntities.setGlowing(player, gp, ChatColor.DARK_PURPLE);
+                } catch (ReflectiveOperationException e) {
+                    MMOStats.LOGGER.info("Erro ao enviar o GlowingEffect de " + gp.getName() + " para " + player.getName());
+                }
+            }
+        }, 20);
+
     }
 
     @EventHandler
@@ -121,7 +138,9 @@ public class EventManager implements Listener {
             event.setCancelled(true);
             return;
         }
-        GameEntity.setOnCooldown((LivingEntity) event.getDamager());
+
+        if (event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE)
+            GameEntity.setOnCooldown((LivingEntity) event.getDamager());
 
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
             GamePlayer player = GamePlayer.getGamePlayer((Player) event.getDamager());
@@ -264,9 +283,13 @@ public class EventManager implements Listener {
 
         int oldLevel = gamePlayer.getLevelFromXp();
         int obtainedLevel = gamePlayer.addXpToPlayer(event.getAmount() * 2.3);
-        int levelDiff = obtainedLevel - oldLevel;
-        for (int level = 0; level <= levelDiff; level++) {
-            gamePlayer.sendActionBar(Component.text("Level-Up! " + oldLevel + " > " + obtainedLevel, NamedTextColor.DARK_GREEN));
+        System.out.println(gamePlayer.getXp());
+        if (oldLevel == obtainedLevel) return;
+        for (int level = oldLevel; level < obtainedLevel; level++) {
+            final Component mainTitle = Component.text("Level-Up!", NamedTextColor.DARK_GREEN);
+            final Component subtitle = Component.text(oldLevel + " > " + level + 1, NamedTextColor.GREEN);
+            Title title = Title.title(mainTitle, subtitle);
+            gamePlayer.showTitle(title);
         }
     }
 }

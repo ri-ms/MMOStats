@@ -2,6 +2,7 @@ package com.klrir.mmoStats.hook;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.klrir.mmoStats.MMOStats;
 import org.bukkit.Bukkit;
 
 import java.util.*;
@@ -28,10 +29,10 @@ public class Hook {
 
         for (HookType hook : HookType.values()) {
             if (isHooked(hook)) {
-                System.out.println("[MMOStats Hook] Hooking " + hook.name());
+                MMOStats.LOGGER.info("[MMOStats Hook] Hooking " + hook.name());
                 continue;
             }
-            System.out.println("[MMOStats Hook] " + hook.name() + " not found! Continuating...");
+            MMOStats.LOGGER.warning("[MMOStats Hook] " + hook.name() + " not found! Continuating...");
         }
     }
 
@@ -43,6 +44,10 @@ public class Hook {
     }
 
     public static boolean isHooked(HookType hook) {
-        return hookList.getOrDefault(hook, false);
+        boolean isHooked = hookList.getOrDefault(hook, false);
+        if (!isHooked) {
+            MMOStats.LOGGER.info("[MMOStats Hook] " + hook.name() + " is not here!");
+        }
+        return isHooked;
     }
 }
