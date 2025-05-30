@@ -2,6 +2,9 @@ name: MMOStats
 version: '1.0-SNAPSHOT'
 main: com.klrir.mmoStats.MMOStats
 api-version: '1.21'
+libraries:
+  - com.mysql:mysql-connector-j:9.3.0
+  - org.xerial:sqlite-jdbc:3.49.1.0
 softdepend: [ ProtocolLib ]
 commands:
   e:

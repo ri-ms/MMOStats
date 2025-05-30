@@ -1,0 +1,11 @@
+# Database configuration (sqlite/mysql):
+Database:
+  Type: sqlite
+  MySQL:
+    Host: localhost
+    Port: 3306
+    Database: db
+    User: user
+    Password: pass
+  SQLite:
+    File: sqlite.db

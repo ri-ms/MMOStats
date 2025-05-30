@@ -10,6 +10,8 @@ import com.klrir.mmoStats.commands.test.GlowCommand;
 import com.klrir.mmoStats.commands.test.togglestats;
 import com.klrir.mmoStats.commands.test.toggletab;
 import com.klrir.mmoStats.configs.DataManager;
+import com.klrir.mmoStats.database.Database;
+import com.klrir.mmoStats.database.Settings;
 import com.klrir.mmoStats.entities.BasicEntity;
 import com.klrir.mmoStats.events.EventManager;
 import com.klrir.mmoStats.game.EntityMap;
@@ -26,6 +28,7 @@ import com.klrir.mmoStats.utils.Tools;
 import com.klrir.mmoStats.utils.inventories.items.StarHandler;
 import com.klrir.mmoStats.utils.log.DebugLogger;
 import fr.skytasul.glowingentities.GlowingEntities;
+import lombok.Data;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
@@ -76,8 +79,9 @@ public final class MMOStats extends JavaPlugin {
     @Getter
     public static DebugLogger debug;
 
+    public static Settings settings = Settings.getInstance();
     public static DataManager data;
-
+    public static Database database = Database.getInstance();
     public static Logger LOGGER;
 
     @Getter
@@ -86,10 +90,15 @@ public final class MMOStats extends JavaPlugin {
     @Override
     public void onEnable() {
         // Inicialização básica
+        instance = this;
+
         LOGGER = getLogger();
 
-        initializeConfig();
-        instance = this;
+        settings.load();
+        database.load();
+
+        //initializeConfig();
+
         glowingEntities = new GlowingEntities(this);
 
         // Registrar hooks
@@ -113,10 +122,12 @@ public final class MMOStats extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        glowingEntities.disable();
+        Database.getInstance().close();
+        //glowingEntities.disable();
     }
 
     private void initializeConfig() {
+        config.addDefault("GameDataPath", ".\\data");
         config.addDefault("StatSystem", true);
         config.options().copyDefaults(true);
         saveConfig();

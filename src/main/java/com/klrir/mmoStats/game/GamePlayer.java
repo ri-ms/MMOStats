@@ -58,6 +58,7 @@ public class GamePlayer extends CraftPlayer {
     public GamePlayer(CraftServer server, ServerPlayer player){
         this(server, player, false);
     }
+
     public GamePlayer(CraftServer server, ServerPlayer entity, boolean isChecked) {
         super(server, entity);
         this.player = entity.getBukkitEntity().getPlayer();
@@ -78,12 +79,7 @@ public class GamePlayer extends CraftPlayer {
     }
 
     private void loadStatus() {
-        for (Stats stat : Stats.values()){
-            if (stat == Stats.WeaponDamage) continue;
-            double value = statsConfig.get().getDouble(stat.getDataName(), stat.getBaseAmount());
-            if (stat.getMaxAmount() > 0 && value > stat.getMaxAmount()) value = stat.getMaxAmount();
-            setBaseStat(stat, value);
-        }
+        MMOStats.database.initializePlayerData(this).forEach(this::setBaseStat);
 
         currmana = (int) MMOStats.getPlayerStat(this, Stats.Inteligence);
         currhealth = (int) MMOStats.getPlayerStat(this, Stats.Health);

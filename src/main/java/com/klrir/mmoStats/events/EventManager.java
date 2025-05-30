@@ -3,6 +3,7 @@ package com.klrir.mmoStats.events;
 import com.klrir.mmoStats.API.HealthChangeReason;
 import com.klrir.mmoStats.MMOStats;
 import com.klrir.mmoStats.Stats;
+import com.klrir.mmoStats.database.Database;
 import com.klrir.mmoStats.entities.BasicEntity;
 import com.klrir.mmoStats.entities.StandCoreExtention;
 import com.klrir.mmoStats.game.*;
@@ -35,9 +36,12 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event){
+
         MMOStats.absorbtion.put(event.getPlayer(), 0);
         MMOStats.absorbtionrunntime.put(event.getPlayer(), 0);
+
         GamePlayer player = new GamePlayer((CraftServer) MMOStats.getInstance().getServer(), ((CraftPlayer) event.getPlayer()).getHandle());
+
         GlowingEntities glowingEntities = MMOStats.getGlowingEntities();
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(MMOStats.getInstance(), () -> {
